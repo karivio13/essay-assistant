@@ -195,15 +195,64 @@ function Chat({ student, sessionId }) {
   const [image, setImage] = useState(null); // { base64, mediaType, preview }
   const fileRef = useRef(null);
 
-  const handleImage = (e) => {
+  const handleImage = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      const base64 = reader.result.split(",")[1];
-      setImage({ base64, mediaType: file.type, preview: reader.result });
+
+    // Convert HEIC to JPEG using a canvas if needed
+    const processFile = (blob, mimeType) => {
+      return new Promise((resolve) => {
+        const img = new Image();
+        const url = URL.createObjectURL(blob);
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          canvas.width = img.width;
+          canvas.height = img.height;
+          canvas.getContext("2d").drawImage(img, 0, 0);
+          canvas.toBlob((jpegBlob) => {
+            const reader = new FileReader();
+            reader.onload = () => {
+              const base64 = reader.result.split(",")[1];
+              resolve({ base64, mediaType: "image/jpeg", preview: reader.result });
+            };
+            reader.readAsDataURL(jpegBlob);
+          }, "image/jpeg", 0.92);
+          URL.revokeObjectURL(url);
+        };
+        img.src = url;
+      });
     };
-    reader.readAsDataURL(file);
+
+    const isHEIC = file.type === "image/heic" || file.type === "image/heif" || file.name.toLowerCase().endsWith(".heic") || file.name.toLowerCase().endsWith(".heif");
+
+    if (isHEIC) {
+      // Load heic2any from CDN dynamically
+      if (!window.heic2any) {
+        await new Promise((resolve, reject) => {
+          const s = document.createElement("script");
+          s.src = "https://cdnjs.cloudflare.com/ajax/libs/heic2any/0.0.4/heic2any.min.js";
+          s.onload = resolve;
+          s.onerror = reject;
+          document.head.appendChild(s);
+        });
+      }
+      try {
+        const jpegBlob = await window.heic2any({ blob: file, toType: "image/jpeg", quality: 0.92 });
+        const result = await processFile(jpegBlob, "image/jpeg");
+        setImage(result);
+      } catch {
+        // Fallback: try reading directly
+        const reader = new FileReader();
+        reader.onload = () => {
+          const base64 = reader.result.split(",")[1];
+          setImage({ base64, mediaType: "image/jpeg", preview: reader.result });
+        };
+        reader.readAsDataURL(file);
+      }
+    } else {
+      const result = await processFile(file, file.type);
+      setImage(result);
+    }
   };
 
   const send = async (text) => {
@@ -332,7 +381,7 @@ function Chat({ student, sessionId }) {
 
         <div style={{ display: "flex", background: "white", border: "1.5px solid #d0d8f0", borderRadius: 14, overflow: "hidden", boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
           {/* Hidden file input */}
-          <input ref={fileRef} type="file" accept="image/*" onChange={handleImage} style={{ display: "none" }} />
+          <input ref={fileRef} type="file" accept="image/*,.heic,.heif" onChange={handleImage} style={{ display: "none" }} />
 
           {/* Image upload button */}
           <button onClick={() => fileRef.current.click()} title="Upload handwritten paragraph" style={{
