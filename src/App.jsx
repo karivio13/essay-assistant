@@ -233,15 +233,10 @@ function Chat({ student, sessionId }) {
         return { role: m.role, content: m.content };
       });
 
-      const res = await fetch("https://api.anthropic.com/v1/messages", {
+      const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
-          max_tokens: 1000,
-          system: SYSTEM_PROMPT,
-          messages: apiMessages,
-        }),
+        body: JSON.stringify({ messages: apiMessages }),
       });
       const data = await res.json();
       const reply = data.content?.[0]?.text || "Sorry, I couldn't generate a response.";
@@ -419,18 +414,10 @@ function TeacherDashboard({ onBack }) {
       .join("\n\n");
 
     try {
-      const res = await fetch("https://api.anthropic.com/v1/messages", {
+      const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
-          max_tokens: 500,
-          system: `You are an educational analyst. Based on a tutoring conversation, extract two things in JSON format only, no markdown:
-{
-  "difficulties": "Brief list of the main writing difficulties or errors identified in the student's work (max 3, comma-separated)",
-  "learned": "Brief list of skills or concepts the student showed progress on or already mastered (max 3, comma-separated)"
-}
-If there is not enough information, write "Not enough data" in each field.`,
           messages: [{ role: "user", content: transcript }],
         }),
       });
