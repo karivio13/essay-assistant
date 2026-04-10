@@ -192,15 +192,47 @@ function Chat({ student, sessionId }) {
     save();
   }, [messages]);
 
+  const [image, setImage] = useState(null); // { base64, mediaType, preview }
+  const fileRef = useRef(null);
+
+  const handleImage = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const base64 = reader.result.split(",")[1];
+      setImage({ base64, mediaType: file.type, preview: reader.result });
+    };
+    reader.readAsDataURL(file);
+  };
+
   const send = async (text) => {
     const userText = text || input.trim();
-    if (!userText || loading) return;
-    const userMsg = { role: "user", content: userText, ts: new Date().toISOString() };
+    if ((!userText && !image) || loading) return;
+
+    // Build display message
+    const displayContent = userText || "📷 Handwritten paragraph (image)";
+    const userMsg = { role: "user", content: displayContent, ts: new Date().toISOString(), image: image?.preview };
     const newMsgs = [...messages, userMsg];
     setMessages(newMsgs);
     setInput("");
+    const sentImage = image;
+    setImage(null);
     setLoading(true);
+
     try {
+      // Build API messages — include image if present
+      const apiMessages = newMsgs.map((m, i) => {
+        if (i === newMsgs.length - 1 && sentImage) {
+          const content = [];
+          if (userText) content.push({ type: "text", text: userText });
+          content.push({ type: "text", text: "Please read my handwritten paragraph in this image, transcribe it, and give me feedback on it." });
+          content.push({ type: "image", source: { type: "base64", media_type: sentImage.mediaType, data: sentImage.base64 } });
+          return { role: "user", content };
+        }
+        return { role: m.role, content: m.content };
+      });
+
       const res = await fetch("https://api.anthropic.com/v1/messages", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -208,7 +240,7 @@ function Chat({ student, sessionId }) {
           model: "claude-sonnet-4-20250514",
           max_tokens: 1000,
           system: SYSTEM_PROMPT,
-          messages: newMsgs.map(m => ({ role: m.role, content: m.content })),
+          messages: apiMessages,
         }),
       });
       const data = await res.json();
@@ -238,6 +270,9 @@ function Chat({ student, sessionId }) {
               boxShadow: "0 2px 8px rgba(0,0,0,0.07)",
               border: msg.role === "assistant" ? "1px solid #e8ecf8" : "none",
             }}>
+              {msg.image && (
+                <img src={msg.image} alt="handwritten" style={{ maxWidth: "100%", borderRadius: 8, marginBottom: 8, display: "block" }} />
+              )}
               {formatMsg(msg.content)}
             </div>
           </div>
@@ -287,20 +322,43 @@ function Chat({ student, sessionId }) {
           </div>
         )}
 
+        {/* Image preview */}
+        {image && (
+          <div style={{ marginBottom: 10, position: "relative", display: "inline-block" }}>
+            <img src={image.preview} alt="preview" style={{ maxHeight: 120, borderRadius: 10, border: "1.5px solid #d0d8f0", display: "block" }} />
+            <button onClick={() => setImage(null)} style={{
+              position: "absolute", top: -8, right: -8,
+              background: "#e05252", color: "white", border: "none",
+              borderRadius: "50%", width: 22, height: 22, fontSize: "0.75rem",
+              cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+            }}>✕</button>
+          </div>
+        )}
+
         <div style={{ display: "flex", background: "white", border: "1.5px solid #d0d8f0", borderRadius: 14, overflow: "hidden", boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
+          {/* Hidden file input */}
+          <input ref={fileRef} type="file" accept="image/*" onChange={handleImage} style={{ display: "none" }} />
+
+          {/* Image upload button */}
+          <button onClick={() => fileRef.current.click()} title="Upload handwritten paragraph" style={{
+            background: "transparent", border: "none", borderRight: "1px solid #e8ecf8",
+            padding: "0 14px", cursor: "pointer", fontSize: "1.2rem", color: image ? blue : "#aab",
+            transition: "color 0.2s",
+          }}>📷</button>
+
           <textarea
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }}
-            placeholder="Type your question or paste your draft here…"
+            placeholder="Type your question, paste your draft, or upload a photo 📷"
             rows={3}
             style={{ flex: 1, border: "none", outline: "none", padding: "14px 16px", fontSize: "0.92rem", fontFamily: "Georgia,serif", resize: "none", color: navy, lineHeight: 1.55, background: "transparent" }}
           />
-          <button onClick={() => send()} disabled={!input.trim() || loading} style={{
-            background: input.trim() && !loading ? `linear-gradient(135deg,${navy},${navyMid})` : "#e8ecf8",
-            color: input.trim() && !loading ? "white" : "#aab",
+          <button onClick={() => send()} disabled={(!input.trim() && !image) || loading} style={{
+            background: (input.trim() || image) && !loading ? `linear-gradient(135deg,${navy},${navyMid})` : "#e8ecf8",
+            color: (input.trim() || image) && !loading ? "white" : "#aab",
             border: "none", padding: "0 22px",
-            cursor: input.trim() && !loading ? "pointer" : "not-allowed",
+            cursor: (input.trim() || image) && !loading ? "pointer" : "not-allowed",
             fontSize: "1.2rem", transition: "all 0.2s", borderLeft: "1px solid #e8ecf8",
           }}>→</button>
         </div>
