@@ -1,6 +1,26 @@
 import { useState, useRef, useEffect } from "react";
 import * as XLSX from "xlsx";
 
+const SHEETS_URL = "https://script.google.com/macros/s/AKfycbxSBm2vB8XauxnoJLjISv3YJ_mOQsiCWUz1hxNkBHqGGVDtcs9U_UOGFz99T4-R3LdG/exec";
+
+const saveToSheets = async (student, userMessage, feedback) => {
+  try {
+    await fetch(SHEETS_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: student.name,
+        section: student.section,
+        email: student.email,
+        date: new Date().toLocaleDateString("es-CL"),
+        studentMessage: userMessage,
+        feedback,
+      }),
+    });
+  } catch {}
+};
+
 const TEACHER_PASSWORD = "Docente2024";
 
 const SYSTEM_PROMPT = `You are an academic writing assistant designed to help B2-B2+ English level students write a formal, informative essay on school coexistence. Your role is strictly to guide, review, and give feedback — you never write the essay for the student.
@@ -13,15 +33,15 @@ STUDENT LEVEL: B2 to B2+ (Upper-Intermediate to Advanced)
 ESSAY REQUIREMENTS:
 Topic: School coexistence (convivencia escolar)
 Length: approximately 350 words
-Structure: Introduction → Body paragraphs → Conclusion
+Structure: Introduction - Body paragraphs - Conclusion
 Tone: Formal, neutral, and academic
 Language: English only
 
 EVALUATION CRITERIA:
-1. TASK ACHIEVEMENT – objective, informative, key terms defined, ideas supported with evidence
-2. COHERENCE & COHESION – logical flow, cohesive devices (furthermore, however, in addition, therefore...)
-3. USE OF LANGUAGE – formal vocabulary, grammatical accuracy, sentence variety
-4. PUNCTUATION & CAPITALIZATION – no run-ons, correct commas/periods, proper capitalization
+1. TASK ACHIEVEMENT - objective, informative, key terms defined, ideas supported with evidence
+2. COHERENCE AND COHESION - logical flow, cohesive devices (furthermore, however, in addition, therefore...)
+3. USE OF LANGUAGE - formal vocabulary, grammatical accuracy, sentence variety
+4. PUNCTUATION AND CAPITALIZATION - no run-ons, correct commas/periods, proper capitalization
 
 GRAMMAR TO TEACH: relative clauses, passive voice, transitional phrases, cohesive devices.
 
@@ -30,9 +50,10 @@ HOW TO BEHAVE:
 - Be encouraging but honest
 - Explain WHY errors are wrong and HOW to fix them
 - Ask guiding questions instead of giving answers
-- Give structured feedback: Task Achievement → Coherence → Language → Grammar → Punctuation
+- Give structured feedback: Task Achievement - Coherence - Language - Grammar - Punctuation
 - Never write full paragraphs for the student
-- Use bullet points for feedback`;
+- Use bullet points for feedback
+- If the student sends a handwritten image, first transcribe it clearly, then give structured feedback.`;
 
 const navy = "#1a2744";
 const navyMid = "#2d3f6e";
@@ -90,7 +111,7 @@ function Header({ student, onTeacher }) {
       <div>
         <div style={{ fontWeight: "bold", fontSize: "1.05rem" }}>Essay Writing Assistant</div>
         <div style={{ fontSize: "0.78rem", opacity: 0.7, fontFamily: "sans-serif", marginTop: 2 }}>
-          School Coexistence · B2–B2+ English
+          School Coexistence · B2-B2+ English
           {student && ` · ${student.name} (${student.section})`}
         </div>
       </div>
@@ -100,7 +121,7 @@ function Header({ student, onTeacher }) {
           background: "transparent", border: "1px solid rgba(255,255,255,0.25)",
           borderRadius: 20, padding: "4px 12px", color: "rgba(255,255,255,0.7)",
           fontSize: "0.72rem", fontFamily: "sans-serif", cursor: "pointer",
-        }}>👩‍🏫 Docente</button>
+        }}>Docente</button>
       </div>
     </div>
   );
@@ -114,8 +135,8 @@ function StudentLogin({ onStart }) {
   const valid = name.trim() && section.trim() && email.trim() && email.includes("@");
 
   const fields = [
-    { label: "Full name",  value: name,    set: setName,    placeholder: "e.g. María González",  type: "text" },
-    { label: "Section",    value: section, set: setSection, placeholder: "e.g. 4° Medio A",      type: "text" },
+    { label: "Full name",  value: name,    set: setName,    placeholder: "e.g. Maria Gonzalez",  type: "text" },
+    { label: "Section",    value: section, set: setSection, placeholder: "e.g. 4 Medio A",       type: "text" },
     { label: "Email",      value: email,   set: setEmail,   placeholder: "e.g. maria@gmail.com", type: "email" },
   ];
 
@@ -142,7 +163,7 @@ function StudentLogin({ onStart }) {
           </div>
         ))}
         <div style={{ fontSize: "0.75rem", color: "#7a8aaa", fontFamily: "sans-serif", marginBottom: 16 }}>
-          📧 Your email will be saved for your teacher's records.
+          Your email will be saved for your teacher's records.
         </div>
         <button onClick={() => valid && onStart({ name: name.trim(), section: section.trim(), email: email.trim() })} disabled={!valid} style={{
           width: "100%", padding: 13,
@@ -151,7 +172,7 @@ function StudentLogin({ onStart }) {
           border: "none", borderRadius: 12, fontSize: "0.95rem",
           fontFamily: "sans-serif", fontWeight: 600,
           cursor: valid ? "pointer" : "not-allowed",
-        }}>Start writing →</button>
+        }}>Start writing</button>
       </div>
     </div>
   );
@@ -160,21 +181,22 @@ function StudentLogin({ onStart }) {
 function Chat({ student, sessionId }) {
   const initMsg = {
     role: "assistant",
-    content: `Hello, ${student.name}! 👋 I'm your academic writing assistant.\n\nI'm here to help you write a well-structured, formal informative essay on **school coexistence** in English. You can:\n\n• **Paste your draft** and I'll give you detailed feedback\n• **Ask grammar questions** (passive voice, relative clauses, etc.)\n• **Get help with structure** — intro, body, and conclusion\n• **Check your vocabulary** and academic tone\n\nWhat would you like to work on today?`,
+    content: `Hello, ${student.name}! I am your academic writing assistant.\n\nI am here to help you write a well-structured, formal informative essay on **school coexistence** in English. You can:\n\n- **Paste your draft** and I will give you detailed feedback\n- **Ask grammar questions** (passive voice, relative clauses, etc.)\n- **Get help with structure** - intro, body, and conclusion\n- **Upload a photo** of your handwritten paragraph\n\nWhat would you like to work on today?`,
     ts: new Date().toISOString(),
   };
 
   const [messages, setMessages] = useState([initMsg]);
   const [input, setInput]       = useState("");
   const [loading, setLoading]   = useState(false);
-  const bottomRef = useRef(null);
+  const [image, setImage]       = useState(null);
+  const fileRef                 = useRef(null);
+  const bottomRef               = useRef(null);
 
-  // word count
-  const words      = input.trim() === "" ? 0 : input.trim().split(/\s+/).length;
-  const target     = 350;
-  const pct        = Math.min(words / target, 1);
-  const barColor   = words === 0 ? "#e8ecf8" : words < 250 ? "#f0a500" : words <= 420 ? "#2a9d6e" : "#e05252";
-  const barLabel   = words < 250 ? "Keep writing! 💪" : words <= 420 ? "Great length! ✅" : "A bit long — consider trimming ✂️";
+  const words    = input.trim() === "" ? 0 : input.trim().split(/\s+/).length;
+  const target   = 350;
+  const pct      = Math.min(words / target, 1);
+  const barColor = words === 0 ? "#e8ecf8" : words < 250 ? "#f0a500" : words <= 420 ? "#2a9d6e" : "#e05252";
+  const barLabel = words < 250 ? "Keep writing!" : words <= 420 ? "Great length!" : "A bit long - consider trimming";
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, loading]);
 
@@ -192,15 +214,11 @@ function Chat({ student, sessionId }) {
     save();
   }, [messages]);
 
-  const [image, setImage] = useState(null); // { base64, mediaType, preview }
-  const fileRef = useRef(null);
-
   const handleImage = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Convert HEIC to JPEG using a canvas if needed
-    const processFile = (blob, mimeType) => {
+    const processFile = (blob) => {
       return new Promise((resolve) => {
         const img = new Image();
         const url = URL.createObjectURL(blob);
@@ -223,10 +241,11 @@ function Chat({ student, sessionId }) {
       });
     };
 
-    const isHEIC = file.type === "image/heic" || file.type === "image/heif" || file.name.toLowerCase().endsWith(".heic") || file.name.toLowerCase().endsWith(".heif");
+    const isHEIC = file.type === "image/heic" || file.type === "image/heif"
+      || file.name.toLowerCase().endsWith(".heic")
+      || file.name.toLowerCase().endsWith(".heif");
 
     if (isHEIC) {
-      // Load heic2any from CDN dynamically
       if (!window.heic2any) {
         await new Promise((resolve, reject) => {
           const s = document.createElement("script");
@@ -238,10 +257,9 @@ function Chat({ student, sessionId }) {
       }
       try {
         const jpegBlob = await window.heic2any({ blob: file, toType: "image/jpeg", quality: 0.92 });
-        const result = await processFile(jpegBlob, "image/jpeg");
+        const result = await processFile(jpegBlob);
         setImage(result);
       } catch {
-        // Fallback: try reading directly
         const reader = new FileReader();
         reader.onload = () => {
           const base64 = reader.result.split(",")[1];
@@ -250,7 +268,7 @@ function Chat({ student, sessionId }) {
         reader.readAsDataURL(file);
       }
     } else {
-      const result = await processFile(file, file.type);
+      const result = await processFile(file);
       setImage(result);
     }
   };
@@ -259,8 +277,7 @@ function Chat({ student, sessionId }) {
     const userText = text || input.trim();
     if ((!userText && !image) || loading) return;
 
-    // Build display message
-    const displayContent = userText || "📷 Handwritten paragraph (image)";
+    const displayContent = userText || "Handwritten paragraph (image)";
     const userMsg = { role: "user", content: displayContent, ts: new Date().toISOString(), image: image?.preview };
     const newMsgs = [...messages, userMsg];
     setMessages(newMsgs);
@@ -270,7 +287,6 @@ function Chat({ student, sessionId }) {
     setLoading(true);
 
     try {
-      // Build API messages — include image if present
       const apiMessages = newMsgs.map((m, i) => {
         if (i === newMsgs.length - 1 && sentImage) {
           const content = [];
@@ -289,6 +305,7 @@ function Chat({ student, sessionId }) {
       });
       const data = await res.json();
       const reply = data.content?.[0]?.text || "Sorry, I couldn't generate a response.";
+      await saveToSheets(student, displayContent, reply);
       setMessages([...newMsgs, { role: "assistant", content: reply, ts: new Date().toISOString() }]);
     } catch {
       setMessages([...newMsgs, { role: "assistant", content: "Something went wrong. Please try again.", ts: new Date().toISOString() }]);
@@ -299,7 +316,6 @@ function Chat({ student, sessionId }) {
 
   return (
     <>
-      {/* Messages */}
       <div style={{ flex: 1, overflowY: "auto", padding: "24px 20px", display: "flex", flexDirection: "column", gap: 16, maxWidth: 780, width: "100%", margin: "0 auto", boxSizing: "border-box" }}>
         {messages.map((msg, i) => (
           <div key={i} style={{ display: "flex", justifyContent: msg.role === "user" ? "flex-end" : "flex-start", alignItems: "flex-start", gap: 10 }}>
@@ -314,9 +330,7 @@ function Chat({ student, sessionId }) {
               boxShadow: "0 2px 8px rgba(0,0,0,0.07)",
               border: msg.role === "assistant" ? "1px solid #e8ecf8" : "none",
             }}>
-              {msg.image && (
-                <img src={msg.image} alt="handwritten" style={{ maxWidth: "100%", borderRadius: 8, marginBottom: 8, display: "block" }} />
-              )}
+              {msg.image && <img src={msg.image} alt="handwritten" style={{ maxWidth: "100%", borderRadius: 8, marginBottom: 8, display: "block" }} />}
               {formatMsg(msg.content)}
             </div>
           </div>
@@ -332,7 +346,6 @@ function Chat({ student, sessionId }) {
         <div ref={bottomRef} />
       </div>
 
-      {/* Suggestions */}
       {messages.length <= 1 && (
         <div style={{ padding: "0 20px 12px", maxWidth: 780, width: "100%", margin: "0 auto", boxSizing: "border-box" }}>
           <div style={{ fontSize: "0.75rem", color: "#7a8aaa", fontFamily: "sans-serif", marginBottom: 8, letterSpacing: "0.5px" }}>QUICK START</div>
@@ -347,16 +360,11 @@ function Chat({ student, sessionId }) {
         </div>
       )}
 
-      {/* Input area */}
       <div style={{ padding: "14px 20px 20px", maxWidth: 780, width: "100%", margin: "0 auto", boxSizing: "border-box" }}>
-
-        {/* Word count bar */}
         {words > 0 && (
           <div style={{ marginBottom: 10, background: "white", border: "1px solid #e8ecf8", borderRadius: 12, padding: "10px 14px", boxShadow: "0 1px 6px rgba(0,0,0,0.04)" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 5 }}>
-              <span style={{ fontSize: "0.78rem", fontFamily: "sans-serif", color: barColor, fontWeight: 700 }}>
-                {words} word{words !== 1 ? "s" : ""}
-              </span>
+              <span style={{ fontSize: "0.78rem", fontFamily: "sans-serif", color: barColor, fontWeight: 700 }}>{words} word{words !== 1 ? "s" : ""}</span>
               <span style={{ fontSize: "0.72rem", fontFamily: "sans-serif", color: "#aab" }}>Target: {target} words</span>
             </div>
             <div style={{ height: 6, background: "#e8ecf8", borderRadius: 10, overflow: "hidden" }}>
@@ -366,35 +374,21 @@ function Chat({ student, sessionId }) {
           </div>
         )}
 
-        {/* Image preview */}
         {image && (
           <div style={{ marginBottom: 10, position: "relative", display: "inline-block" }}>
             <img src={image.preview} alt="preview" style={{ maxHeight: 120, borderRadius: 10, border: "1.5px solid #d0d8f0", display: "block" }} />
-            <button onClick={() => setImage(null)} style={{
-              position: "absolute", top: -8, right: -8,
-              background: "#e05252", color: "white", border: "none",
-              borderRadius: "50%", width: 22, height: 22, fontSize: "0.75rem",
-              cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
-            }}>✕</button>
+            <button onClick={() => setImage(null)} style={{ position: "absolute", top: -8, right: -8, background: "#e05252", color: "white", border: "none", borderRadius: "50%", width: 22, height: 22, fontSize: "0.75rem", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>x</button>
           </div>
         )}
 
         <div style={{ display: "flex", background: "white", border: "1.5px solid #d0d8f0", borderRadius: 14, overflow: "hidden", boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
-          {/* Hidden file input */}
           <input ref={fileRef} type="file" accept="image/*,.heic,.heif" onChange={handleImage} style={{ display: "none" }} />
-
-          {/* Image upload button */}
-          <button onClick={() => fileRef.current.click()} title="Upload handwritten paragraph" style={{
-            background: "transparent", border: "none", borderRight: "1px solid #e8ecf8",
-            padding: "0 14px", cursor: "pointer", fontSize: "1.2rem", color: image ? blue : "#aab",
-            transition: "color 0.2s",
-          }}>📷</button>
-
+          <button onClick={() => fileRef.current.click()} title="Upload handwritten paragraph" style={{ background: "transparent", border: "none", borderRight: "1px solid #e8ecf8", padding: "0 14px", cursor: "pointer", fontSize: "1.2rem", color: image ? blue : "#aab" }}>📷</button>
           <textarea
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }}
-            placeholder="Type your question, paste your draft, or upload a photo 📷"
+            placeholder="Type your question, paste your draft, or upload a photo"
             rows={3}
             style={{ flex: 1, border: "none", outline: "none", padding: "14px 16px", fontSize: "0.92rem", fontFamily: "Georgia,serif", resize: "none", color: navy, lineHeight: 1.55, background: "transparent" }}
           />
@@ -429,8 +423,8 @@ function TeacherLogin({ onLogin, onBack }) {
         <input type="password" value={pwd} onChange={e => { setPwd(e.target.value); setErr(false); }} onKeyDown={e => e.key === "Enter" && handle()} placeholder="Password"
           style={{ width: "100%", padding: "11px 14px", border: `1.5px solid ${err ? "#e05252" : "#d0d8f0"}`, borderRadius: 10, fontSize: "0.92rem", fontFamily: "sans-serif", color: navy, outline: "none", boxSizing: "border-box", marginBottom: 8 }} />
         {err && <div style={{ color: "#e05252", fontSize: "0.8rem", fontFamily: "sans-serif", marginBottom: 10 }}>Incorrect password. Try again.</div>}
-        <button onClick={handle} style={{ width: "100%", padding: 13, background: `linear-gradient(135deg,${navy},${navyMid})`, color: "white", border: "none", borderRadius: 12, fontSize: "0.95rem", fontFamily: "sans-serif", fontWeight: 600, cursor: "pointer", marginTop: 4 }}>Enter →</button>
-        <button onClick={onBack} style={{ width: "100%", padding: 10, background: "transparent", color: "#7a8aaa", border: "none", borderRadius: 12, fontSize: "0.85rem", fontFamily: "sans-serif", cursor: "pointer", marginTop: 8 }}>← Back</button>
+        <button onClick={handle} style={{ width: "100%", padding: 13, background: `linear-gradient(135deg,${navy},${navyMid})`, color: "white", border: "none", borderRadius: 12, fontSize: "0.95rem", fontFamily: "sans-serif", fontWeight: 600, cursor: "pointer", marginTop: 4 }}>Enter</button>
+        <button onClick={onBack} style={{ width: "100%", padding: 10, background: "transparent", color: "#7a8aaa", border: "none", borderRadius: 12, fontSize: "0.85rem", fontFamily: "sans-serif", cursor: "pointer", marginTop: 8 }}>Back</button>
       </div>
     </div>
   );
@@ -461,19 +455,17 @@ function TeacherDashboard({ onBack }) {
       .filter(m => !m.content.startsWith("Hello,"))
       .map(m => `[${m.role === "user" ? "Student" : "Assistant"}]: ${m.content}`)
       .join("\n\n");
-
     try {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          messages: [{ role: "user", content: transcript }],
+          messages: [{ role: "user", content: `Analyze this tutoring conversation and respond ONLY with a JSON object (no markdown):\n{"difficulties":"max 3 main writing difficulties, comma-separated","learned":"max 3 skills already mastered, comma-separated"}\n\n${transcript}` }],
         }),
       });
       const data = await res.json();
       const text = data.content?.[0]?.text || "{}";
-      const clean = text.replace(/```json|```/g, "").trim();
-      return JSON.parse(clean);
+      return JSON.parse(text.replace(/```json|```/g, "").trim());
     } catch {
       return { difficulties: "Could not analyze", learned: "Could not analyze" };
     }
@@ -482,23 +474,17 @@ function TeacherDashboard({ onBack }) {
   const downloadExcel = async () => {
     setExporting(true);
     const rows = [];
-
     for (const s of sessions) {
-      const date = s.startTime ? new Date(s.startTime).toLocaleDateString("es-CL", { day: "2-digit", month: "2-digit", year: "numeric" }) : "—";
-
-      // Pair student messages with the next assistant response
+      const date = s.startTime ? new Date(s.startTime).toLocaleDateString("es-CL") : "-";
       const msgs = s.messages.filter(m => !m.content.startsWith("Hello,"));
       const pairs = [];
       for (let i = 0; i < msgs.length; i++) {
         if (msgs[i].role === "user") {
-          const feedback = msgs[i + 1]?.role === "assistant" ? msgs[i + 1].content : "—";
+          const feedback = msgs[i + 1]?.role === "assistant" ? msgs[i + 1].content : "-";
           pairs.push({ student: msgs[i].content, feedback });
         }
       }
-
-      // AI analysis of the full session
       const analysis = await analyzeSession(s);
-
       pairs.forEach((p, idx) => {
         rows.push({
           "Student Name":       s.student.name,
@@ -510,45 +496,26 @@ function TeacherDashboard({ onBack }) {
           "Already Learned":    idx === 0 ? analysis.learned : "",
         });
       });
-
-      // If student had no messages yet
       if (pairs.length === 0) {
-        rows.push({
-          "Student Name":       s.student.name,
-          "Section":            s.student.section,
-          "Date":               date,
-          "Student Message":    "—",
-          "Assistant Feedback": "—",
-          "Main Difficulties":  "—",
-          "Already Learned":    "—",
-        });
+        rows.push({ "Student Name": s.student.name, "Section": s.student.section, "Date": date, "Student Message": "-", "Assistant Feedback": "-", "Main Difficulties": "-", "Already Learned": "-" });
       }
     }
-
     const ws = XLSX.utils.json_to_sheet(rows);
     ws["!cols"] = [20, 14, 14, 60, 60, 40, 40].map(w => ({ wch: w }));
-
-    // Style header row
-    const range = XLSX.utils.decode_range(ws["!ref"]);
-    for (let c = range.s.c; c <= range.e.c; c++) {
-      const cell = XLSX.utils.encode_cell({ r: 0, c });
-      if (ws[cell]) ws[cell].s = { font: { bold: true }, fill: { fgColor: { rgb: "1a2744" } } };
-    }
-
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Student Report");
     XLSX.writeFile(wb, `essay_report_${new Date().toISOString().slice(0,10)}.xlsx`);
     setExporting(false);
   };
 
-  const fmtDate = ts => ts ? new Date(ts).toLocaleDateString("es-CL", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }) : "—";
+  const fmtDate = ts => ts ? new Date(ts).toLocaleDateString("es-CL", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }) : "-";
   const msgCount = s => s.messages.filter(m => m.role === "user").length;
 
   return (
     <div style={{ flex: 1, overflowY: "auto", padding: "24px 20px", maxWidth: 900, width: "100%", margin: "0 auto", boxSizing: "border-box" }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24, flexWrap: "wrap", gap: 12 }}>
         <div>
-          <div style={{ fontSize: "1.2rem", fontWeight: "bold", color: navy, fontFamily: "Georgia,serif" }}>👩‍🏫 Teacher Dashboard</div>
+          <div style={{ fontSize: "1.2rem", fontWeight: "bold", color: navy, fontFamily: "Georgia,serif" }}>Teacher Dashboard</div>
           <div style={{ fontSize: "0.8rem", color: "#7a8aaa", fontFamily: "sans-serif", marginTop: 2 }}>{sessions.length} session{sessions.length !== 1 ? "s" : ""} recorded</div>
         </div>
         <div style={{ display: "flex", gap: 10 }}>
@@ -557,8 +524,8 @@ function TeacherDashboard({ onBack }) {
             color: sessions.length && !exporting ? "white" : "#aab", border: "none", borderRadius: 10,
             padding: "9px 18px", fontSize: "0.85rem", fontFamily: "sans-serif", fontWeight: 600,
             cursor: sessions.length && !exporting ? "pointer" : "not-allowed",
-          }}>{exporting ? "⏳ Analyzing sessions…" : "📥 Download Excel"}</button>
-          <button onClick={onBack} style={{ background: "white", border: "1px solid #d0d8f0", borderRadius: 10, padding: "9px 16px", fontSize: "0.85rem", fontFamily: "sans-serif", color: "#5a6a8a", cursor: "pointer" }}>← Back</button>
+          }}>{exporting ? "Analyzing..." : "Download Excel"}</button>
+          <button onClick={onBack} style={{ background: "white", border: "1px solid #d0d8f0", borderRadius: 10, padding: "9px 16px", fontSize: "0.85rem", fontFamily: "sans-serif", color: "#5a6a8a", cursor: "pointer" }}>Back</button>
         </div>
       </div>
 
@@ -578,7 +545,7 @@ function TeacherDashboard({ onBack }) {
         </div>
       )}
 
-      {loadingData && <div style={{ textAlign: "center", padding: 60, color: "#7a8aaa", fontFamily: "sans-serif" }}>Loading sessions…</div>}
+      {loadingData && <div style={{ textAlign: "center", padding: 60, color: "#7a8aaa", fontFamily: "sans-serif" }}>Loading sessions...</div>}
       {!loadingData && !sessions.length && (
         <div style={{ textAlign: "center", padding: 60, color: "#7a8aaa", fontFamily: "sans-serif" }}>
           <div style={{ fontSize: 48, marginBottom: 12 }}>📭</div>
