@@ -21,11 +21,7 @@ const saveToSheets = async (student, userMessage, feedback) => {
   } catch {}
 };
 
-const TEACHER_PASSWORD = "Docente2024";
-
-const SYSTEM_PROMPT = `You are an academic writing assistant and English language assessor for a B2+ English class. Students have written an informative essay of 350–450 words based on a provided source text about school coexistence. Your role is to give detailed, honest, and constructive feedback — never write the essay for the student.
-
----
+const SYSTEM_PROMPT = `You are an academic writing assistant and English language assessor for a B2+ English class. Students have written an informative essay of 350-450 words based on a provided source text about school coexistence. Your role is to give detailed, honest, and constructive feedback — never write the essay for the student.
 
 CEFR B2 DESCRIPTORS YOU MUST USE TO ASSESS:
 
@@ -36,7 +32,7 @@ TASK ACHIEVEMENT (B2 standard):
 - Key concepts are defined accurately
 - The source text is referenced or paraphrased (not copied)
 
-COHERENCE & COHESION (B2 standard):
+COHERENCE AND COHESION (B2 standard):
 - Ideas are logically organized: introduction, body paragraphs, conclusion
 - A variety of cohesive devices are used accurately (furthermore, however, consequently, in addition, as a result, in contrast, for instance, therefore, on the other hand)
 - Paragraphs are well-structured with clear topic sentences
@@ -45,70 +41,62 @@ COHERENCE & COHESION (B2 standard):
 LEXICAL RESOURCE (B2 standard):
 - Vocabulary is formal and academic throughout
 - A good range of vocabulary related to the topic is used
-- Informal words must be flagged: "kids" → "students/children", "a lot" → "a significant number", "stuff" → "aspects/elements", "good" → "beneficial/effective"
-- Some flexibility and precision in word choice
+- Informal words must be flagged: "kids" -> "students/children", "a lot" -> "a significant number", "stuff" -> "aspects/elements", "good" -> "beneficial/effective"
 - Avoids repetition of the same words
 
-GRAMMATICAL RANGE & ACCURACY (B2 standard):
+GRAMMATICAL RANGE AND ACCURACY (B2 standard):
 - Uses a variety of structures: simple, compound, and complex sentences
-- Passive voice is used appropriately (e.g., "Bullying is often defined as...", "Rules are established to...")
+- Passive voice is used appropriately
 - Relative clauses are used correctly (which, who, that, where)
-- Generally accurate grammar with only occasional errors that do not impede communication
+- Generally accurate grammar with only occasional errors
 - Correct use of articles, prepositions, subject-verb agreement, and verb tenses
-
----
 
 HOW TO STRUCTURE YOUR FEEDBACK — always follow this exact format:
 
+Always begin with this exact line: "The following feedback is based on the Common European Framework of Reference for Languages (CEFR), 2020 Companion Volume — the most updated version of the framework."
+
 **CEFR LEVEL ASSESSMENT**
 State clearly whether the essay meets B2, is above (B2+/C1) or below (B1/B1+), and justify with specific evidence from the text.
-⚠️ If the essay is below B2, raise a clear alert: "⚠️ WARNING: This essay does not yet meet B2 standard." and explain precisely why.
+If the essay is below B2, raise a clear alert: "WARNING: This essay does not yet meet B2 standard." and explain precisely why.
 
 **TASK ACHIEVEMENT**
-Evaluate whether the essay is informative, objective, and based on the source text. Flag any opinions presented as facts, missing definitions, or lack of supporting detail.
+Evaluate whether the essay is informative, objective, and based on the source text. Flag any opinions, missing definitions, or lack of supporting detail.
 
-**COHERENCE & COHESION**
-Comment on structure, paragraph organization, and use of cohesive devices. Quote specific sentences from the student's text to illustrate points.
+**COHERENCE AND COHESION**
+Comment on structure, paragraph organization, and use of cohesive devices. Quote specific sentences from the student's text.
 
 **LEXICAL RESOURCE**
-Identify informal or repeated vocabulary. Quote the exact word/phrase and suggest a formal academic alternative.
+Identify informal or repeated vocabulary. Quote the exact word or phrase and suggest a formal academic alternative.
 
-**GRAMMATICAL RANGE & ACCURACY**
+**GRAMMATICAL RANGE AND ACCURACY**
 Identify grammar errors with the exact quote, explain why it is wrong, and provide the corrected version.
-Format: ❌ "[student's sentence]" → ✅ "[corrected version]" — Reason: [brief explanation]
+Format: [student's sentence] -> [corrected version] — Reason: [brief explanation]
 
----
-
-AFTER THE CRITERIA, ALWAYS ADD:
-
-**THREE STRENGTHS**
+THREE STRENGTHS
 Identify 3 specific things the student did well, with quotes from their text as evidence.
 
-**THREE AREAS FOR IMPROVEMENT**
-Give 3 concrete, actionable suggestions. Be specific — not "improve your vocabulary" but "replace 'kids' with 'students' and 'a lot of' with 'a significant number of'".
+THREE AREAS FOR IMPROVEMENT
+Give 3 concrete, actionable suggestions with specific examples.
 
-**SENTENCE REWRITE EXAMPLE**
+SENTENCE REWRITE EXAMPLE
 Pick one weak sentence from the essay. Show:
-- Original: "[quote]"
-- Improved: "[rewritten version]"
-- Why it's better: [brief explanation]
+- Original: [quote]
+- Improved: [rewritten version]
+- Why it is better: [brief explanation]
 
-**COHESIVE DEVICE / STRUCTURE SUGGESTION**
-Suggest one specific cohesive device or sentence structure the student is not using, with an example of how they could apply it in their essay.
+COHESIVE DEVICE OR STRUCTURE SUGGESTION
+Suggest one specific cohesive device or sentence structure the student is not using, with an example of how they could apply it.
 
-**WORKING ON THE WEAKEST AREA**
-Identify the student's single weakest area and give a specific, practical strategy to improve it (e.g., a mini-exercise, a tip, or a guided question).
-
----
+WORKING ON THE WEAKEST AREA
+Identify the student's single weakest area and give a specific, practical strategy to improve it.
 
 IMPORTANT RULES:
 - Always respond in English
-- Always quote the student's exact words when giving feedback — never be vague
-- Be encouraging but completely honest — do not soften serious errors
-- If the student sends a handwritten image, first transcribe it fully and clearly, then apply the full feedback structure above
+- Always quote the student's exact words when giving feedback
+- Be encouraging but completely honest
+- If the student sends a handwritten image, first transcribe it fully, then apply the full feedback structure above
 - Never write full paragraphs or essays for the student
-- If the student asks a grammar question instead of submitting a draft, answer clearly with examples, then invite them to apply it in their writing`;
-
+- If the student asks a grammar question, answer clearly with examples, then invite them to apply it in their writing`;
 
 const navy = "#1a2744";
 const navyMid = "#2d3f6e";
@@ -116,14 +104,20 @@ const blue = "#4f7af8";
 const lightBlue = "#7c9fff";
 const bgGrad = "linear-gradient(135deg, #f8f9ff 0%, #eef1fb 100%)";
 
-const suggestions = [
+const quickStart = [
   "Check my introduction",
   "Check my paragraph",
   "Check my conclusion",
   "Check my complete essay",
 ];
 
-function sessionKey(id) { return `session:${id}`; }
+const followUps = [
+  "What is my English level?",
+  "What practice can I do to improve?",
+  "Can you explain my grammar mistakes?",
+  "How can I improve my vocabulary?",
+  "Can you give me an example of passive voice?",
+];
 
 function formatMsg(text) {
   return text.split("\n").map((line, i, arr) => {
@@ -181,7 +175,6 @@ function StudentLogin({ onStart }) {
   const [name, setName]       = useState("");
   const [section, setSection] = useState("");
   const [email, setEmail]     = useState("");
-
   const valid = name.trim() && section.trim() && email.trim() && email.includes("@");
 
   const fields = [
@@ -189,6 +182,8 @@ function StudentLogin({ onStart }) {
     { label: "Section",    value: section, set: setSection, placeholder: "e.g. 4 Medio A",       type: "text" },
     { label: "Email",      value: email,   set: setEmail,   placeholder: "e.g. maria@gmail.com", type: "email" },
   ];
+
+  const start = () => valid && onStart({ name: name.trim(), section: section.trim(), email: email.trim() });
 
   return (
     <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
@@ -201,11 +196,8 @@ function StudentLogin({ onStart }) {
         {fields.map(({ label, value, set, placeholder, type }) => (
           <div key={label} style={{ marginBottom: 18 }}>
             <label style={{ display: "block", fontSize: "0.8rem", fontFamily: "sans-serif", color: "#5a6a8a", marginBottom: 6, fontWeight: 600 }}>{label}</label>
-            <input
-              type={type} value={value}
-              onChange={e => set(e.target.value)}
-              placeholder={placeholder}
-              onKeyDown={e => e.key === "Enter" && valid && onStart({ name: name.trim(), section: section.trim(), email: email.trim() })}
+            <input type={type} value={value} onChange={e => set(e.target.value)} placeholder={placeholder}
+              onKeyDown={e => e.key === "Enter" && start()}
               style={{ width: "100%", padding: "11px 14px", border: "1.5px solid #d0d8f0", borderRadius: 10, fontSize: "0.92rem", fontFamily: "Georgia,serif", color: navy, outline: "none", boxSizing: "border-box" }}
               onFocus={e => e.target.style.borderColor = blue}
               onBlur={e => e.target.style.borderColor = "#d0d8f0"}
@@ -215,12 +207,11 @@ function StudentLogin({ onStart }) {
         <div style={{ fontSize: "0.75rem", color: "#7a8aaa", fontFamily: "sans-serif", marginBottom: 16 }}>
           Your email will be saved for your teacher's records.
         </div>
-        <button onClick={() => valid && onStart({ name: name.trim(), section: section.trim(), email: email.trim() })} disabled={!valid} style={{
+        <button onClick={start} disabled={!valid} style={{
           width: "100%", padding: 13,
           background: valid ? `linear-gradient(135deg,${navy},${navyMid})` : "#e8ecf8",
-          color: valid ? "white" : "#aab",
-          border: "none", borderRadius: 12, fontSize: "0.95rem",
-          fontFamily: "sans-serif", fontWeight: 600,
+          color: valid ? "white" : "#aab", border: "none", borderRadius: 12,
+          fontSize: "0.95rem", fontFamily: "sans-serif", fontWeight: 600,
           cursor: valid ? "pointer" : "not-allowed",
         }}>Start writing</button>
       </div>
@@ -228,10 +219,10 @@ function StudentLogin({ onStart }) {
   );
 }
 
-function Chat({ student, sessionId }) {
+function Chat({ student }) {
   const initMsg = {
     role: "assistant",
-    content: `Hello, ${student.name}! I am your academic writing assistant.\n\nI am here to help you write a well-structured, formal informative essay on **school coexistence** in English. You can:\n\n- **Paste your draft** and I will give you detailed feedback\n- **Ask grammar questions** (passive voice, relative clauses, etc.)\n- **Get help with structure** - intro, body, and conclusion\n- **Upload a photo** of your handwritten paragraph\n\nWhat would you like to work on today?`,
+    content: `Hello, ${student.name}! I am your academic writing assistant.\n\nI am here to help you with your informative essay on **school coexistence**. You can:\n\n- **Paste your draft** and I will give you detailed CEFR-based feedback\n- **Upload a photo** of your handwritten paragraph\n- **Ask grammar questions** (passive voice, relative clauses, etc.)\n\nWhat would you like to work on today?`,
     ts: new Date().toISOString(),
   };
 
@@ -245,81 +236,57 @@ function Chat({ student, sessionId }) {
   const words    = input.trim() === "" ? 0 : input.trim().split(/\s+/).length;
   const target   = 350;
   const pct      = Math.min(words / target, 1);
-  const barColor = words === 0 ? "#e8ecf8" : words < 250 ? "#f0a500" : words <= 420 ? "#2a9d6e" : "#e05252";
-  const barLabel = words < 250 ? "Keep writing!" : words <= 420 ? "Great length!" : "A bit long - consider trimming";
+  const barColor = words === 0 ? "#e8ecf8" : words < 250 ? "#f0a500" : words <= 450 ? "#2a9d6e" : "#e05252";
+  const barLabel = words < 250 ? "Keep writing!" : words <= 450 ? "Great length!" : "A bit long — consider trimming";
+
+  const lastIsAssistant = messages.length > 1 && messages[messages.length - 1].role === "assistant";
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, loading]);
-
-  useEffect(() => {
-    const save = async () => {
-      try {
-        await window.storage.set(sessionKey(sessionId), JSON.stringify({
-          sessionId, student,
-          startTime: messages[0]?.ts,
-          lastTime: messages[messages.length - 1]?.ts,
-          messages,
-        }), true);
-      } catch {}
-    };
-    save();
-  }, [messages]);
 
   const handleImage = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const processFile = (blob) => {
-      return new Promise((resolve) => {
-        const img = new Image();
-        const url = URL.createObjectURL(blob);
-        img.onload = () => {
-          const canvas = document.createElement("canvas");
-          canvas.width = img.width;
-          canvas.height = img.height;
-          canvas.getContext("2d").drawImage(img, 0, 0);
-          canvas.toBlob((jpegBlob) => {
-            const reader = new FileReader();
-            reader.onload = () => {
-              const base64 = reader.result.split(",")[1];
-              resolve({ base64, mediaType: "image/jpeg", preview: reader.result });
-            };
-            reader.readAsDataURL(jpegBlob);
-          }, "image/jpeg", 0.92);
-          URL.revokeObjectURL(url);
-        };
-        img.src = url;
-      });
-    };
+    const processFile = (blob) => new Promise((resolve) => {
+      const img = new Image();
+      const url = URL.createObjectURL(blob);
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = img.width;
+        canvas.height = img.height;
+        canvas.getContext("2d").drawImage(img, 0, 0);
+        canvas.toBlob((jpegBlob) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve({ base64: reader.result.split(",")[1], mediaType: "image/jpeg", preview: reader.result });
+          reader.readAsDataURL(jpegBlob);
+        }, "image/jpeg", 0.92);
+        URL.revokeObjectURL(url);
+      };
+      img.src = url;
+    });
 
     const isHEIC = file.type === "image/heic" || file.type === "image/heif"
-      || file.name.toLowerCase().endsWith(".heic")
-      || file.name.toLowerCase().endsWith(".heif");
+      || file.name.toLowerCase().endsWith(".heic") || file.name.toLowerCase().endsWith(".heif");
 
     if (isHEIC) {
       if (!window.heic2any) {
         await new Promise((resolve, reject) => {
           const s = document.createElement("script");
           s.src = "https://cdnjs.cloudflare.com/ajax/libs/heic2any/0.0.4/heic2any.min.js";
-          s.onload = resolve;
-          s.onerror = reject;
+          s.onload = resolve; s.onerror = reject;
           document.head.appendChild(s);
         });
       }
       try {
         const jpegBlob = await window.heic2any({ blob: file, toType: "image/jpeg", quality: 0.92 });
-        const result = await processFile(jpegBlob);
-        setImage(result);
+        setImage(await processFile(jpegBlob));
       } catch {
         const reader = new FileReader();
-        reader.onload = () => {
-          const base64 = reader.result.split(",")[1];
-          setImage({ base64, mediaType: "image/jpeg", preview: reader.result });
-        };
+        reader.onload = () => setImage({ base64: reader.result.split(",")[1], mediaType: "image/jpeg", preview: reader.result });
         reader.readAsDataURL(file);
       }
     } else {
-      const result = await processFile(file);
-      setImage(result);
+      setImage(await processFile(file));
     }
   };
 
@@ -354,7 +321,7 @@ function Chat({ student, sessionId }) {
         body: JSON.stringify({ messages: apiMessages }),
       });
       const data = await res.json();
-      const reply = data.content?.[0]?.text || "Sorry, I couldn't generate a response.";
+      const reply = data.content?.[0]?.text || "Sorry, I could not generate a response.";
       await saveToSheets(student, displayContent, reply);
       setMessages([...newMsgs, { role: "assistant", content: reply, ts: new Date().toISOString() }]);
     } catch {
@@ -364,8 +331,20 @@ function Chat({ student, sessionId }) {
     }
   };
 
+  const SuggestBtn = ({ label }) => (
+    <button onClick={() => send(label)} style={{
+      background: "white", border: "1px solid #d0d8f0", borderRadius: 20,
+      padding: "6px 14px", fontSize: "0.78rem", color: navy,
+      cursor: "pointer", fontFamily: "sans-serif", transition: "all 0.15s",
+    }}
+      onMouseOver={e => e.currentTarget.style.borderColor = blue}
+      onMouseOut={e => e.currentTarget.style.borderColor = "#d0d8f0"}
+    >{label}</button>
+  );
+
   return (
     <>
+      {/* Messages */}
       <div style={{ flex: 1, overflowY: "auto", padding: "24px 20px", display: "flex", flexDirection: "column", gap: 16, maxWidth: 780, width: "100%", margin: "0 auto", boxSizing: "border-box" }}>
         {messages.map((msg, i) => (
           <div key={i} style={{ display: "flex", justifyContent: msg.role === "user" ? "flex-end" : "flex-start", alignItems: "flex-start", gap: 10 }}>
@@ -385,6 +364,7 @@ function Chat({ student, sessionId }) {
             </div>
           </div>
         ))}
+
         {loading && (
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <Avatar />
@@ -393,29 +373,36 @@ function Chat({ student, sessionId }) {
             </div>
           </div>
         )}
+
+        {/* Follow-up suggestions after assistant replies */}
+        {lastIsAssistant && !loading && (
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8, paddingLeft: 42 }}>
+            {followUps.map((s, i) => <SuggestBtn key={i} label={s} />)}
+          </div>
+        )}
+
         <div ref={bottomRef} />
       </div>
 
+      {/* Quick start — shown only before first user message */}
       {messages.length <= 1 && (
         <div style={{ padding: "0 20px 12px", maxWidth: 780, width: "100%", margin: "0 auto", boxSizing: "border-box" }}>
           <div style={{ fontSize: "0.75rem", color: "#7a8aaa", fontFamily: "sans-serif", marginBottom: 8, letterSpacing: "0.5px" }}>QUICK START</div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-            {suggestions.map((s, i) => (
-              <button key={i} onClick={() => send(s)} style={{ background: "white", border: "1px solid #d0d8f0", borderRadius: 20, padding: "7px 14px", fontSize: "0.82rem", color: navy, cursor: "pointer", fontFamily: "sans-serif" }}
-                onMouseOver={e => e.currentTarget.style.borderColor = blue}
-                onMouseOut={e => e.currentTarget.style.borderColor = "#d0d8f0"}
-              >{s}</button>
-            ))}
+            {quickStart.map((s, i) => <SuggestBtn key={i} label={s} />)}
           </div>
         </div>
       )}
 
+      {/* Input area */}
       <div style={{ padding: "14px 20px 20px", maxWidth: 780, width: "100%", margin: "0 auto", boxSizing: "border-box" }}>
+
+        {/* Word count */}
         {words > 0 && (
           <div style={{ marginBottom: 10, background: "white", border: "1px solid #e8ecf8", borderRadius: 12, padding: "10px 14px", boxShadow: "0 1px 6px rgba(0,0,0,0.04)" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 5 }}>
               <span style={{ fontSize: "0.78rem", fontFamily: "sans-serif", color: barColor, fontWeight: 700 }}>{words} word{words !== 1 ? "s" : ""}</span>
-              <span style={{ fontSize: "0.72rem", fontFamily: "sans-serif", color: "#aab" }}>Target: {target} words</span>
+              <span style={{ fontSize: "0.72rem", fontFamily: "sans-serif", color: "#aab" }}>Target: {target}–450 words</span>
             </div>
             <div style={{ height: 6, background: "#e8ecf8", borderRadius: 10, overflow: "hidden" }}>
               <div style={{ height: "100%", width: `${pct * 100}%`, background: barColor, borderRadius: 10, transition: "width 0.15s, background 0.3s" }} />
@@ -424,10 +411,11 @@ function Chat({ student, sessionId }) {
           </div>
         )}
 
+        {/* Image preview */}
         {image && (
           <div style={{ marginBottom: 10, position: "relative", display: "inline-block" }}>
             <img src={image.preview} alt="preview" style={{ maxHeight: 120, borderRadius: 10, border: "1.5px solid #d0d8f0", display: "block" }} />
-            <button onClick={() => setImage(null)} style={{ position: "absolute", top: -8, right: -8, background: "#e05252", color: "white", border: "none", borderRadius: "50%", width: 22, height: 22, fontSize: "0.75rem", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>x</button>
+            <button onClick={() => setImage(null)} style={{ position: "absolute", top: -8, right: -8, background: "#e05252", color: "white", border: "none", borderRadius: "50%", width: 22, height: 22, fontSize: "0.75rem", cursor: "pointer" }}>x</button>
           </div>
         )}
 
@@ -458,16 +446,12 @@ function Chat({ student, sessionId }) {
   );
 }
 
-
-
 export default function App() {
-  const [view, setView]           = useState("login");
-  const [student, setStudent]     = useState(null);
-  const [sessionId, setSessionId] = useState(null);
+  const [view, setView]       = useState("login");
+  const [student, setStudent] = useState(null);
 
   const handleStart = info => {
     setStudent(info);
-    setSessionId(`${info.name.replace(/\s+/g,"_")}_${Date.now()}`);
     setView("chat");
   };
 
@@ -475,7 +459,7 @@ export default function App() {
     <div style={{ minHeight: "100vh", background: bgGrad, display: "flex", flexDirection: "column", fontFamily: "Georgia,serif" }}>
       <Header student={view === "chat" ? student : null} />
       {view === "login" && <StudentLogin onStart={handleStart} />}
-      {view === "chat"  && <Chat student={student} sessionId={sessionId} />}
+      {view === "chat"  && <Chat student={student} />}
       <style>{`@keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-5px)}}`}</style>
     </div>
   );
