@@ -23,37 +23,92 @@ const saveToSheets = async (student, userMessage, feedback) => {
 
 const TEACHER_PASSWORD = "Docente2024";
 
-const SYSTEM_PROMPT = `You are an academic writing assistant designed to help B2-B2+ English level students write a formal, informative essay on school coexistence. Your role is strictly to guide, review, and give feedback — you never write the essay for the student.
+const SYSTEM_PROMPT = `You are an academic writing assistant and English language assessor for a B2+ English class. Students have written an informative essay of 350–450 words based on a provided source text about school coexistence. Your role is to give detailed, honest, and constructive feedback — never write the essay for the student.
 
-STUDENT LEVEL: B2 to B2+ (Upper-Intermediate to Advanced)
-- Use clear, accessible academic language. Avoid overly complex vocabulary, but challenge students appropriately.
-- Explain grammar concepts in simple terms with clear examples.
-- Be patient and encouraging.
+---
 
-ESSAY REQUIREMENTS:
-Topic: School coexistence (convivencia escolar)
-Length: approximately 350 words
-Structure: Introduction - Body paragraphs - Conclusion
-Tone: Formal, neutral, and academic
-Language: English only
+CEFR B2 DESCRIPTORS YOU MUST USE TO ASSESS:
 
-EVALUATION CRITERIA:
-1. TASK ACHIEVEMENT - objective, informative, key terms defined, ideas supported with evidence
-2. COHERENCE AND COHESION - logical flow, cohesive devices (furthermore, however, in addition, therefore...)
-3. USE OF LANGUAGE - formal vocabulary, grammatical accuracy, sentence variety
-4. PUNCTUATION AND CAPITALIZATION - no run-ons, correct commas/periods, proper capitalization
+TASK ACHIEVEMENT (B2 standard):
+- The text is clear, detailed, and informative
+- Main ideas are developed with supporting detail and examples from the source
+- The essay is objective and avoids personal opinion
+- Key concepts are defined accurately
+- The source text is referenced or paraphrased (not copied)
 
-GRAMMAR TO TEACH: relative clauses, passive voice, transitional phrases, cohesive devices.
+COHERENCE & COHESION (B2 standard):
+- Ideas are logically organized: introduction, body paragraphs, conclusion
+- A variety of cohesive devices are used accurately (furthermore, however, consequently, in addition, as a result, in contrast, for instance, therefore, on the other hand)
+- Paragraphs are well-structured with clear topic sentences
+- Pronouns, synonyms and lexical chains are used to avoid repetition
 
-HOW TO BEHAVE:
+LEXICAL RESOURCE (B2 standard):
+- Vocabulary is formal and academic throughout
+- A good range of vocabulary related to the topic is used
+- Informal words must be flagged: "kids" → "students/children", "a lot" → "a significant number", "stuff" → "aspects/elements", "good" → "beneficial/effective"
+- Some flexibility and precision in word choice
+- Avoids repetition of the same words
+
+GRAMMATICAL RANGE & ACCURACY (B2 standard):
+- Uses a variety of structures: simple, compound, and complex sentences
+- Passive voice is used appropriately (e.g., "Bullying is often defined as...", "Rules are established to...")
+- Relative clauses are used correctly (which, who, that, where)
+- Generally accurate grammar with only occasional errors that do not impede communication
+- Correct use of articles, prepositions, subject-verb agreement, and verb tenses
+
+---
+
+HOW TO STRUCTURE YOUR FEEDBACK — always follow this exact format:
+
+**CEFR LEVEL ASSESSMENT**
+State clearly whether the essay meets B2, is above (B2+/C1) or below (B1/B1+), and justify with specific evidence from the text.
+⚠️ If the essay is below B2, raise a clear alert: "⚠️ WARNING: This essay does not yet meet B2 standard." and explain precisely why.
+
+**TASK ACHIEVEMENT**
+Evaluate whether the essay is informative, objective, and based on the source text. Flag any opinions presented as facts, missing definitions, or lack of supporting detail.
+
+**COHERENCE & COHESION**
+Comment on structure, paragraph organization, and use of cohesive devices. Quote specific sentences from the student's text to illustrate points.
+
+**LEXICAL RESOURCE**
+Identify informal or repeated vocabulary. Quote the exact word/phrase and suggest a formal academic alternative.
+
+**GRAMMATICAL RANGE & ACCURACY**
+Identify grammar errors with the exact quote, explain why it is wrong, and provide the corrected version.
+Format: ❌ "[student's sentence]" → ✅ "[corrected version]" — Reason: [brief explanation]
+
+---
+
+AFTER THE CRITERIA, ALWAYS ADD:
+
+**THREE STRENGTHS**
+Identify 3 specific things the student did well, with quotes from their text as evidence.
+
+**THREE AREAS FOR IMPROVEMENT**
+Give 3 concrete, actionable suggestions. Be specific — not "improve your vocabulary" but "replace 'kids' with 'students' and 'a lot of' with 'a significant number of'".
+
+**SENTENCE REWRITE EXAMPLE**
+Pick one weak sentence from the essay. Show:
+- Original: "[quote]"
+- Improved: "[rewritten version]"
+- Why it's better: [brief explanation]
+
+**COHESIVE DEVICE / STRUCTURE SUGGESTION**
+Suggest one specific cohesive device or sentence structure the student is not using, with an example of how they could apply it in their essay.
+
+**WORKING ON THE WEAKEST AREA**
+Identify the student's single weakest area and give a specific, practical strategy to improve it (e.g., a mini-exercise, a tip, or a guided question).
+
+---
+
+IMPORTANT RULES:
 - Always respond in English
-- Be encouraging but honest
-- Explain WHY errors are wrong and HOW to fix them
-- Ask guiding questions instead of giving answers
-- Give structured feedback: Task Achievement - Coherence - Language - Grammar - Punctuation
-- Never write full paragraphs for the student
-- Use bullet points for feedback
-- If the student sends a handwritten image, first transcribe it clearly, then give structured feedback.`;
+- Always quote the student's exact words when giving feedback — never be vague
+- Be encouraging but completely honest — do not soften serious errors
+- If the student sends a handwritten image, first transcribe it fully and clearly, then apply the full feedback structure above
+- Never write full paragraphs or essays for the student
+- If the student asks a grammar question instead of submitting a draft, answer clearly with examples, then invite them to apply it in their writing`;
+
 
 const navy = "#1a2744";
 const navyMid = "#2d3f6e";
@@ -96,7 +151,7 @@ function Avatar({ size = 32 }) {
   );
 }
 
-function Header({ student, onTeacher }) {
+function Header({ student }) {
   return (
     <div style={{
       background: navy, color: "white", padding: "16px 24px",
@@ -109,19 +164,14 @@ function Header({ student, onTeacher }) {
         fontSize: 20, flexShrink: 0,
       }}>✏️</div>
       <div>
-        <div style={{ fontWeight: "bold", fontSize: "1.05rem" }}>Essay Writing Assistant</div>
+        <div style={{ fontWeight: "bold", fontSize: "1.05rem" }}>Chatbot Assistant - IEL</div>
         <div style={{ fontSize: "0.78rem", opacity: 0.7, fontFamily: "sans-serif", marginTop: 2 }}>
           School Coexistence · B2-B2+ English
           {student && ` · ${student.name} (${student.section})`}
         </div>
       </div>
-      <div style={{ marginLeft: "auto", display: "flex", gap: 8, alignItems: "center" }}>
+      <div style={{ marginLeft: "auto" }}>
         <div style={{ background: navyMid, borderRadius: 20, padding: "4px 12px", fontSize: "0.72rem", fontFamily: "sans-serif", color: "#a8c4ff" }}>~350 words</div>
-        <button onClick={onTeacher} style={{
-          background: "transparent", border: "1px solid rgba(255,255,255,0.25)",
-          borderRadius: 20, padding: "4px 12px", color: "rgba(255,255,255,0.7)",
-          fontSize: "0.72rem", fontFamily: "sans-serif", cursor: "pointer",
-        }}>Docente</button>
       </div>
     </div>
   );
@@ -408,196 +458,7 @@ function Chat({ student, sessionId }) {
   );
 }
 
-function TeacherLogin({ onLogin, onBack }) {
-  const [pwd, setPwd] = useState("");
-  const [err, setErr] = useState(false);
-  const handle = () => { if (pwd === TEACHER_PASSWORD) onLogin(); else { setErr(true); setPwd(""); } };
-  return (
-    <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
-      <div style={{ background: "white", borderRadius: 20, padding: "40px 36px", boxShadow: "0 4px 24px rgba(0,0,0,0.08)", maxWidth: 380, width: "100%", border: "1px solid #e8ecf8" }}>
-        <div style={{ textAlign: "center", marginBottom: 28 }}>
-          <div style={{ fontSize: 48, marginBottom: 12 }}>👩‍🏫</div>
-          <div style={{ fontSize: "1.2rem", fontWeight: "bold", color: navy, fontFamily: "Georgia,serif" }}>Teacher Access</div>
-          <div style={{ fontSize: "0.85rem", color: "#7a8aaa", fontFamily: "sans-serif", marginTop: 6 }}>Enter your password to view student reports</div>
-        </div>
-        <input type="password" value={pwd} onChange={e => { setPwd(e.target.value); setErr(false); }} onKeyDown={e => e.key === "Enter" && handle()} placeholder="Password"
-          style={{ width: "100%", padding: "11px 14px", border: `1.5px solid ${err ? "#e05252" : "#d0d8f0"}`, borderRadius: 10, fontSize: "0.92rem", fontFamily: "sans-serif", color: navy, outline: "none", boxSizing: "border-box", marginBottom: 8 }} />
-        {err && <div style={{ color: "#e05252", fontSize: "0.8rem", fontFamily: "sans-serif", marginBottom: 10 }}>Incorrect password. Try again.</div>}
-        <button onClick={handle} style={{ width: "100%", padding: 13, background: `linear-gradient(135deg,${navy},${navyMid})`, color: "white", border: "none", borderRadius: 12, fontSize: "0.95rem", fontFamily: "sans-serif", fontWeight: 600, cursor: "pointer", marginTop: 4 }}>Enter</button>
-        <button onClick={onBack} style={{ width: "100%", padding: 10, background: "transparent", color: "#7a8aaa", border: "none", borderRadius: 12, fontSize: "0.85rem", fontFamily: "sans-serif", cursor: "pointer", marginTop: 8 }}>Back</button>
-      </div>
-    </div>
-  );
-}
 
-function TeacherDashboard({ onBack }) {
-  const [sessions, setSessions]     = useState([]);
-  const [loadingData, setLoading]   = useState(true);
-  const [selected, setSelected]     = useState(null);
-  const [exporting, setExporting]   = useState(false);
-
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const keys = await window.storage.list("session:", true);
-        const all = await Promise.all((keys?.keys || []).map(async k => {
-          try { const r = await window.storage.get(k, true); return r ? JSON.parse(r.value) : null; } catch { return null; }
-        }));
-        setSessions(all.filter(Boolean).sort((a, b) => new Date(b.lastTime) - new Date(a.lastTime)));
-      } catch { setSessions([]); }
-      setLoading(false);
-    };
-    load();
-  }, []);
-
-  const analyzeSession = async (s) => {
-    const transcript = s.messages
-      .filter(m => !m.content.startsWith("Hello,"))
-      .map(m => `[${m.role === "user" ? "Student" : "Assistant"}]: ${m.content}`)
-      .join("\n\n");
-    try {
-      const res = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          messages: [{ role: "user", content: `Analyze this tutoring conversation and respond ONLY with a JSON object (no markdown):\n{"difficulties":"max 3 main writing difficulties, comma-separated","learned":"max 3 skills already mastered, comma-separated"}\n\n${transcript}` }],
-        }),
-      });
-      const data = await res.json();
-      const text = data.content?.[0]?.text || "{}";
-      return JSON.parse(text.replace(/```json|```/g, "").trim());
-    } catch {
-      return { difficulties: "Could not analyze", learned: "Could not analyze" };
-    }
-  };
-
-  const downloadExcel = async () => {
-    setExporting(true);
-    const rows = [];
-    for (const s of sessions) {
-      const date = s.startTime ? new Date(s.startTime).toLocaleDateString("es-CL") : "-";
-      const msgs = s.messages.filter(m => !m.content.startsWith("Hello,"));
-      const pairs = [];
-      for (let i = 0; i < msgs.length; i++) {
-        if (msgs[i].role === "user") {
-          const feedback = msgs[i + 1]?.role === "assistant" ? msgs[i + 1].content : "-";
-          pairs.push({ student: msgs[i].content, feedback });
-        }
-      }
-      const analysis = await analyzeSession(s);
-      pairs.forEach((p, idx) => {
-        rows.push({
-          "Student Name":       s.student.name,
-          "Section":            s.student.section,
-          "Date":               date,
-          "Student Message":    p.student,
-          "Assistant Feedback": p.feedback,
-          "Main Difficulties":  idx === 0 ? analysis.difficulties : "",
-          "Already Learned":    idx === 0 ? analysis.learned : "",
-        });
-      });
-      if (pairs.length === 0) {
-        rows.push({ "Student Name": s.student.name, "Section": s.student.section, "Date": date, "Student Message": "-", "Assistant Feedback": "-", "Main Difficulties": "-", "Already Learned": "-" });
-      }
-    }
-    const ws = XLSX.utils.json_to_sheet(rows);
-    ws["!cols"] = [20, 14, 14, 60, 60, 40, 40].map(w => ({ wch: w }));
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Student Report");
-    XLSX.writeFile(wb, `essay_report_${new Date().toISOString().slice(0,10)}.xlsx`);
-    setExporting(false);
-  };
-
-  const fmtDate = ts => ts ? new Date(ts).toLocaleDateString("es-CL", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }) : "-";
-  const msgCount = s => s.messages.filter(m => m.role === "user").length;
-
-  return (
-    <div style={{ flex: 1, overflowY: "auto", padding: "24px 20px", maxWidth: 900, width: "100%", margin: "0 auto", boxSizing: "border-box" }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24, flexWrap: "wrap", gap: 12 }}>
-        <div>
-          <div style={{ fontSize: "1.2rem", fontWeight: "bold", color: navy, fontFamily: "Georgia,serif" }}>Teacher Dashboard</div>
-          <div style={{ fontSize: "0.8rem", color: "#7a8aaa", fontFamily: "sans-serif", marginTop: 2 }}>{sessions.length} session{sessions.length !== 1 ? "s" : ""} recorded</div>
-        </div>
-        <div style={{ display: "flex", gap: 10 }}>
-          <button onClick={downloadExcel} disabled={!sessions.length || exporting} style={{
-            background: sessions.length && !exporting ? `linear-gradient(135deg,${navy},${navyMid})` : "#e8ecf8",
-            color: sessions.length && !exporting ? "white" : "#aab", border: "none", borderRadius: 10,
-            padding: "9px 18px", fontSize: "0.85rem", fontFamily: "sans-serif", fontWeight: 600,
-            cursor: sessions.length && !exporting ? "pointer" : "not-allowed",
-          }}>{exporting ? "Analyzing..." : "Download Excel"}</button>
-          <button onClick={onBack} style={{ background: "white", border: "1px solid #d0d8f0", borderRadius: 10, padding: "9px 16px", fontSize: "0.85rem", fontFamily: "sans-serif", color: "#5a6a8a", cursor: "pointer" }}>Back</button>
-        </div>
-      </div>
-
-      {sessions.length > 0 && (
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 14, marginBottom: 24 }}>
-          {[
-            { label: "Total sessions",  value: sessions.length, icon: "📋" },
-            { label: "Unique students", value: new Set(sessions.map(s => s.student.name)).size, icon: "👤" },
-            { label: "Total messages",  value: sessions.reduce((a, s) => a + msgCount(s), 0), icon: "💬" },
-          ].map(({ label, value, icon }) => (
-            <div key={label} style={{ background: "white", border: "1px solid #e8ecf8", borderRadius: 14, padding: "18px 20px", boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
-              <div style={{ fontSize: 24, marginBottom: 6 }}>{icon}</div>
-              <div style={{ fontSize: "1.6rem", fontWeight: "bold", color: navy, fontFamily: "Georgia,serif" }}>{value}</div>
-              <div style={{ fontSize: "0.78rem", color: "#7a8aaa", fontFamily: "sans-serif", marginTop: 2 }}>{label}</div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {loadingData && <div style={{ textAlign: "center", padding: 60, color: "#7a8aaa", fontFamily: "sans-serif" }}>Loading sessions...</div>}
-      {!loadingData && !sessions.length && (
-        <div style={{ textAlign: "center", padding: 60, color: "#7a8aaa", fontFamily: "sans-serif" }}>
-          <div style={{ fontSize: 48, marginBottom: 12 }}>📭</div>
-          No student sessions yet.
-        </div>
-      )}
-
-      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-        {sessions.map((s, i) => (
-          <div key={i} style={{ background: "white", border: `1px solid ${selected === i ? blue : "#e8ecf8"}`, borderRadius: 14, overflow: "hidden", boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
-            <div onClick={() => setSelected(selected === i ? null : i)} style={{ padding: "16px 20px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-                <div style={{ width: 40, height: 40, background: `linear-gradient(135deg,${blue},${lightBlue})`, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontWeight: "bold", fontFamily: "sans-serif", fontSize: "0.9rem", flexShrink: 0 }}>
-                  {s.student.name.charAt(0).toUpperCase()}
-                </div>
-                <div>
-                  <div style={{ fontWeight: "bold", color: navy, fontFamily: "Georgia,serif", fontSize: "0.95rem" }}>{s.student.name}</div>
-                  <div style={{ fontSize: "0.78rem", color: "#7a8aaa", fontFamily: "sans-serif", marginTop: 2 }}>
-                    {s.student.section} · {s.student.email || "no email"} · {msgCount(s)} message{msgCount(s) !== 1 ? "s" : ""} · Last: {fmtDate(s.lastTime)}
-                  </div>
-                </div>
-              </div>
-              <div style={{ color: "#7a8aaa" }}>{selected === i ? "▲" : "▼"}</div>
-            </div>
-            {selected === i && (
-              <div style={{ borderTop: "1px solid #e8ecf8", padding: "16px 20px", background: "#fafbff", display: "flex", flexDirection: "column", gap: 10, maxHeight: 400, overflowY: "auto" }}>
-                {s.messages.map((m, j) => (
-                  <div key={j} style={{ display: "flex", flexDirection: "column", alignItems: m.role === "user" ? "flex-end" : "flex-start", gap: 3 }}>
-                    <div style={{ fontSize: "0.7rem", color: "#aab", fontFamily: "sans-serif" }}>
-                      {m.role === "user" ? s.student.name : "Assistant"} · {fmtDate(m.ts)}
-                    </div>
-                    <div style={{
-                      maxWidth: "82%", padding: "10px 14px",
-                      borderRadius: m.role === "user" ? "14px 4px 14px 14px" : "4px 14px 14px 14px",
-                      background: m.role === "user" ? `linear-gradient(135deg,${navy},${navyMid})` : "white",
-                      color: m.role === "user" ? "white" : navy,
-                      fontSize: "0.85rem", lineHeight: 1.6,
-                      border: m.role === "assistant" ? "1px solid #e8ecf8" : "none",
-                      boxShadow: "0 1px 4px rgba(0,0,0,0.06)",
-                    }}>
-                      {formatMsg(m.content)}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
 
 export default function App() {
   const [view, setView]           = useState("login");
@@ -612,11 +473,9 @@ export default function App() {
 
   return (
     <div style={{ minHeight: "100vh", background: bgGrad, display: "flex", flexDirection: "column", fontFamily: "Georgia,serif" }}>
-      <Header student={view === "chat" ? student : null} onTeacher={() => setView("teacherLogin")} />
-      {view === "login"        && <StudentLogin onStart={handleStart} />}
-      {view === "chat"         && <Chat student={student} sessionId={sessionId} />}
-      {view === "teacherLogin" && <TeacherLogin onLogin={() => setView("teacher")} onBack={() => setView(student ? "chat" : "login")} />}
-      {view === "teacher"      && <TeacherDashboard onBack={() => setView(student ? "chat" : "login")} />}
+      <Header student={view === "chat" ? student : null} />
+      {view === "login" && <StudentLogin onStart={handleStart} />}
+      {view === "chat"  && <Chat student={student} sessionId={sessionId} />}
       <style>{`@keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-5px)}}`}</style>
     </div>
   );
