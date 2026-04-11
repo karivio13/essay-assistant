@@ -174,16 +174,15 @@ function Header({ student }) {
 function StudentLogin({ onStart }) {
   const [name, setName]       = useState("");
   const [section, setSection] = useState("");
-  const [email, setEmail]     = useState("");
-  const valid = name.trim() && section.trim() && email.trim() && email.includes("@");
+
+  const valid = name.trim() && section.trim();
 
   const fields = [
-    { label: "Full name",  value: name,    set: setName,    placeholder: "e.g. Maria Gonzalez",  type: "text" },
-    { label: "Section",    value: section, set: setSection, placeholder: "e.g. 4 Medio A",       type: "text" },
-    { label: "Email",      value: email,   set: setEmail,   placeholder: "e.g. maria@gmail.com", type: "email" },
+    { label: "Full name", value: name,    set: setName,    placeholder: "e.g. Maria Gonzalez", type: "text" },
+    { label: "Section",   value: section, set: setSection, placeholder: "e.g. 4 Medio A",      type: "text" },
   ];
 
-  const start = () => valid && onStart({ name: name.trim(), section: section.trim(), email: email.trim() });
+  const start = () => valid && onStart({ name: name.trim(), section: section.trim(), email: "" });
 
   return (
     <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
@@ -204,9 +203,6 @@ function StudentLogin({ onStart }) {
             />
           </div>
         ))}
-        <div style={{ fontSize: "0.75rem", color: "#7a8aaa", fontFamily: "sans-serif", marginBottom: 16 }}>
-          Your email will be saved for your teacher's records.
-        </div>
         <button onClick={start} disabled={!valid} style={{
           width: "100%", padding: 13,
           background: valid ? `linear-gradient(135deg,${navy},${navyMid})` : "#e8ecf8",
@@ -222,7 +218,7 @@ function StudentLogin({ onStart }) {
 function Chat({ student }) {
   const initMsg = {
     role: "assistant",
-    content: `Hello, ${student.name}! I am your academic writing assistant.\n\nI am here to help you with your informative essay on **school coexistence**. You can:\n\n- **Paste your draft** and I will give you detailed CEFR-based feedback\n- **Upload a photo** of your handwritten paragraph\n- **Ask grammar questions** (passive voice, relative clauses, etc.)\n\nWhat would you like to work on today?`,
+    content: `Hello, ${student.name}! I am your academic writing assistant.\n\nI am here to help you with your informative essay on **school coexistence**. All feedback I provide is based on the **Common European Framework of Reference for Languages (CEFR), 2020 Companion Volume** — the most updated version of the framework.\n\nYou can:\n\n- **Paste your draft** and I will give you detailed CEFR-based feedback\n- **Upload a photo** of your handwritten paragraph\n- **Ask grammar questions** (passive voice, relative clauses, etc.)\n\nWhat would you like to work on today?`,
     ts: new Date().toISOString(),
   };
 
